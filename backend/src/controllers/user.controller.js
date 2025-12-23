@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import UserModel from "../models/User.model.js";
 
 export const createUser = async (req, res) => {
@@ -35,20 +36,49 @@ export const createUser = async (req, res) => {
   }
 };
 
-export const getAllUsers = async(req, res) => {
-    try {
-        const users = await UserModel.find();
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await UserModel.find();
 
-        return res.status(200).json({
-            success:true,
-            count:users.length,
-            users,
-        });
-    } catch (error) {
-        console.error("Get All Users Error : ", error);
-        return res.status(500).json({
-            success:false,
-            message:"Failed to fetch Users",
-        });
+    return res.status(200).json({
+      success: true,
+      count: users.length,
+      users,
+    });
+  } catch (error) {
+    console.error("Get All Users Error : ", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch Users",
+    });
+  }
+};
+
+export const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid User ID format",
+      });
     }
-}
+
+    const user = await UserModel.findById(id);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User Not Found" });
+    }
+
+    return res.status(200).json({ success: true, user });
+  } catch (error) {
+    console.error("Get user by ID error : ", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch user",
+    });
+  }
+};
